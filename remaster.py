@@ -27,6 +27,7 @@ import utils
 
 parser = argparse.ArgumentParser(description='Remastering')
 parser.add_argument('--input',   type=str,   default='none', help='Input video')
+parser.add_argument('--output',   type=str,   default='none', help='Output path')
 parser.add_argument('--reference_dir',  type=str, default='none', help='Path to the reference image directory')
 parser.add_argument('--disable_colorization', action='store_true', default=False, help='Remaster without colorization')
 parser.add_argument('--gpu',       action='store_true', default=False, help='Use GPU')
@@ -49,10 +50,10 @@ if not opt.disable_colorization:
 
 print('Processing %s...'%os.path.basename(opt.input))
 
-outputdir = 'tmp/'
-outputdir_in = outputdir+'input/'
+outputdir = opt.output
+outputdir_in = outputdir + '/input/'
 os.makedirs( outputdir_in, exist_ok=True )
-outputdir_out = outputdir+'output/'
+outputdir_out = outputdir + '/output/'
 os.makedirs( outputdir_out, exist_ok=True )
 
 # Prepare reference images
@@ -173,14 +174,14 @@ with torch.no_grad():
    
    # Save result videos
    outfile = opt.input.split('/')[-1].split('.')[0]
-   cmd = 'ffmpeg -y -r %d -i %s%%07d.png -vcodec libx264 -pix_fmt yuv420p -r %d %s_in.mp4' % (fps, outputdir_in, fps, outfile )
+   cmd = f'ffmpeg -y -r {fps:d} -i {outputdir_in}%%07d.png -vcodec libx264 -pix_fmt yuv420p -r {fps:d} {outputdir}/{outfile}_in.mp4'
    subprocess.call( cmd, shell=True )
-   cmd = 'ffmpeg -y -r %d -i %s%%07d.png -vcodec libx264 -pix_fmt yuv420p -r %d %s_out.mp4' % (fps, outputdir_out, fps, outfile )
+   cmd = f'ffmpeg -y -r {fps:d} -i {outputdir_out}%%07d.png -vcodec libx264 -pix_fmt yuv420p -r {fps:d} {outputdir}/{outfile}_out.mp4'
    subprocess.call( cmd, shell=True )
-   cmd = 'ffmpeg -y -i %s_in.mp4 -vf "[in] pad=2.01*iw:ih [left];movie=%s_out.mp4[right];[left][right] overlay=main_w/2:0,scale=2*iw/2:2*ih/2[out]" %s_comp.mp4' % ( outfile, outfile, outfile )
+   cmd = f'ffmpeg -y -i {outputdir}/{outfile}_in.mp4 -vf "[in] pad=2.01*iw:ih [left];movie={outputdir}/{outfile}_out.mp4[right];[left][right] overlay=main_w/2:0,scale=2*iw/2:2*ih/2[out]" {outputdir}/{outfile}_comp.mp4'
    subprocess.call( cmd, shell=True )
 
    import shutil
-   shutil.rmtree(outputdir)
+   # shutil.rmtree(outputdir)
    cap.release()
    pbar.close()
