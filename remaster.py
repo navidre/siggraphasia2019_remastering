@@ -174,9 +174,9 @@ with torch.no_grad():
    
    # Save result videos
    outfile = opt.input.split('/')[-1].split('.')[0]
-   cmd = f'ffmpeg -y -r {fps:d} -i {outputdir_in}%%07d.png -vcodec libx264 -pix_fmt yuv420p -r {fps:d} {outputdir}/{outfile}_in.mp4'
+   cmd = f'ffmpeg -y -r {int(fps)} -i {outputdir_in}%07d.png -vcodec libx264 -pix_fmt yuv420p -r {int(fps)} {outputdir}/{outfile}_in.mp4'
    subprocess.call( cmd, shell=True )
-   cmd = f'ffmpeg -y -r {fps:d} -i {outputdir_out}%%07d.png -vcodec libx264 -pix_fmt yuv420p -r {fps:d} {outputdir}/{outfile}_out.mp4'
+   cmd = f'ffmpeg -y -r {int(fps)} -i {outputdir_out}%07d.png -vcodec libx264 -pix_fmt yuv420p -r {int(fps)} {outputdir}/{outfile}_out.mp4'
    subprocess.call( cmd, shell=True )
    cmd = f'ffmpeg -y -i {outputdir}/{outfile}_in.mp4 -vf "[in] pad=2.01*iw:ih [left];movie={outputdir}/{outfile}_out.mp4[right];[left][right] overlay=main_w/2:0,scale=2*iw/2:2*ih/2[out]" {outputdir}/{outfile}_comp.mp4'
    subprocess.call( cmd, shell=True )
